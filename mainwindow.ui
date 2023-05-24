@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>580</width>
+    <height>375</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="2">
+     <widget class="QPushButton" name="butt_clone">
+      <property name="text">
+       <string>Дублировать</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="butt_del">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="src.qrc">
+        <normaloff>:/trash.ico</normaloff>:/trash.ico</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QPushButton" name="butt_add">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="src.qrc">
+        <normaloff>:/add.ico</normaloff>:/add.ico</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="6">
+     <widget class="QTableView" name="table_view"/>
+    </item>
+    <item row="1" column="3">
+     <widget class="QPushButton" name="butt_edit">
+      <property name="text">
+       <string>Редактировать</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QPushButton" name="butt_filter">
+      <property name="text">
+       <string>Фильтр</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="5">
+     <widget class="QLineEdit" name="lineEdit_search"/>
+    </item>
+    <item row="2" column="5">
+     <widget class="QPushButton" name="butt_search">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="src.qrc">
+        <normaloff>:/search.ico</normaloff>:/search.ico</iconset>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>580</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="action_new"/>
+    <addaction name="action_open"/>
+    <addaction name="action_clear"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Справка</string>
+    </property>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_new">
+   <property name="text">
+    <string>Создать</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+N</string>
+   </property>
+  </action>
+  <action name="action_open">
+   <property name="text">
+    <string>Открыть</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+O</string>
+   </property>
+  </action>
+  <action name="action_clear">
+   <property name="text">
+    <string>Очистить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+C</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="src.qrc"/>
+ </resources>
+ <connections/>
+</ui>

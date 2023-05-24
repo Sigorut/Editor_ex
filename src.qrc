@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>add.ico</file>
+        <file>search.ico</file>
+        <file>trash.ico</file>
+        <file>string_response.html</file>
+        <file>number_response.html</file>
+        <file>table_comp_response.html</file>
+        <file>Style.css</file>
+        <file>Script_table_comp.js</file>
+        <file>table_seq_response.html</file>
+        <file>Script_table_seq.js</file>
+        <file>threetf.html</file>
+        <file>Script_threetf.js</file>
+        <file>table_word_response.html</file>
+        <file>Script_table_word.js</file>
+    </qresource>
+</RCC>

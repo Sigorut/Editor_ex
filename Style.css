@@ -1,0 +1,33 @@
+div.pbody{
+    margin-bottom: 20px;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    background-color: rgba(48, 213, 200, 0.2);
+}
+
+body{
+background-color: rgba(237, 237, 237, 1);
+}
+
+table, th, td{
+    border: 1px solid black;
+    text-align:center;
+    border-collapse: collapse;
+}
+
+input.field{
+    background: transparent;
+    border: none;
+    white-space: pre-wrap;
+
+}
+input.table_field{
+    background: transparent;
+    border: none;
+    width: calc(20vw);
+}
+
+h4{
+    text-align: center;
+}
+

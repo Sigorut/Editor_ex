@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Table_seq_response
+        </title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+    <script src="Script_threetf.js"></script>
+    <link rel="stylesheet" href="Style.css">
+    <div >
+        <h4>Верные или неверные</h4>
+        <div class = "pbody" id = "frame">
+            <p>Текст задания:</p>
+            <p>
+                <textarea id="input_text_ex4" cols="40" rows="3"></textarea>
+            </p>
+            <p>
+                <p>Путь к рисунку:<p>
+                <input id = "path_file4" type = "text">
+                <input id = "butt_brouse4" type = "button" value="⋯">
+            </p>
+            <p>
+                <p>Количество пунктов<p>
+                <input id = "count_options4" type="number">
+                <input id = "ok4" type="button" value = "ОК" onclick="gen_fields()">
+            </p>
+            <p id = "options_block4">
+                <ol id = "options04">
+                </ol>
+            </p>
+        </div>
+        <div>
+            <p>Текст пояснения:</p>
+            <p>
+                <textarea id="solution_text_ex4" cols="40" rows="3"></textarea>
+            </p>
+        </div>
+    </div>
+    </body>
+</html>
