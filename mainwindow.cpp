@@ -13,8 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     select_type_form = new Select_type_ex();
     model = new QStandardItemModel();
     testmodel  = new QStandardItemModel();
-
-
+    set_enabled_butt(false);
     ui->table_view->horizontalHeader()->setStretchLastSection(true);
     ui->table_view->setSortingEnabled(true);
     ui->table_view->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -29,13 +28,25 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_new, SIGNAL(triggered()), SLOT(slot_create_bd()));
     connect(ui->action_open, SIGNAL(triggered()), SLOT(slot_open_bd()));
     connect(ui->table_view, SIGNAL(clicked(const QModelIndex &)),SLOT(slot_current_index_model(const QModelIndex &)));
-    connect(ui->table_view, SIGNAL(doubleClicked(QModelIndex)),SLOT(slot_edit_current_ex(QModelIndex)));
-
+    connect(ui->table_view, SIGNAL(doubleClicked(QModelIndex)),SLOT(slot_edit_current_ex()));
+    connect(ui->butt_edit, SIGNAL(clicked()), SLOT(slot_edit_current_ex()));
+    connect(ui->butt_clone, SIGNAL(clicked()), SLOT(slot_clone_current_ex()));
+    connect(ui->action_clear, SIGNAL(triggered()), SLOT(slot_clear_bd()));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::set_enabled_butt(bool flag)
+{
+    ui->butt_clone->setEnabled(flag);
+    ui->butt_add->setEnabled(flag);
+    ui->butt_del->setEnabled(flag);
+    ui->butt_edit->setEnabled(flag);
+    ui->butt_filter->setEnabled(flag);
+    ui->butt_search->setEnabled(flag);
 }
 
 void MainWindow::open_bd()
@@ -56,6 +67,7 @@ void MainWindow::open_bd()
         update_model(json_all_ex);
         ui->table_view->setModel(model);
         ui->table_view->setColumnHidden(3, true);
+        ui->table_view->sortByColumn(0, Qt::SortOrder::AscendingOrder);
         bd.close();
     }
 }
@@ -87,6 +99,9 @@ void MainWindow::add_ex_to_bd(QJsonObject record)
 void MainWindow::update_model(QJsonArray ex_all)
 {
     int i = 0;
+    int sort_column = ui->table_view->horizontalHeader()->sortIndicatorSection();
+
+    int sort_order = ui->table_view->horizontalHeader()->sortIndicatorOrder();
     QStandardItem *item;
     QStringList labels;
     QStringList temp;
@@ -121,6 +136,7 @@ void MainWindow::update_model(QJsonArray ex_all)
         i++;
     }
     ui->table_view->setColumnHidden(3, true);
+    ui->table_view->sortByColumn(sort_column, Qt::SortOrder(sort_order));
 }
 
 void MainWindow::slot_search()
@@ -162,16 +178,20 @@ void MainWindow::slot_create_bd()
     QString path_to_file = QFileDialog::getSaveFileName(this, tr("Сохранить"),
                                                         "/",
                                                         tr("JSON (*.json)"));
-    QFile filejson(path_to_file);
-    if(filejson.open(QIODevice::WriteOnly)){
-        QJsonArray json_all_ex;
-        QJsonDocument jsonDoc;
-        jsonDoc.setArray(json_all_ex);
-        filejson.write(jsonDoc.toJson());
-        filejson.close();
-    }
+    qDebug() << path_to_file;
+
     if(!path_to_file.isEmpty()){
+
         path_to_bd = path_to_file;
+        QFile filejson(path_to_bd);
+        if(filejson.open(QIODevice::WriteOnly)){
+            QJsonArray json_all_ex;
+            QJsonDocument jsonDoc;
+            jsonDoc.setArray(json_all_ex);
+            filejson.write(jsonDoc.toJson());
+            filejson.close();
+        }
+        set_enabled_butt(true);
         open_bd();
     }
 }
@@ -182,8 +202,42 @@ void MainWindow::slot_open_bd()
                                                         "/",
                                                         tr("*.json"));
     if(!path_to_file.isEmpty()){
+        set_enabled_butt(true);
         path_to_bd = path_to_file;
         open_bd();
+    }
+}
+
+void MainWindow::slot_clear_bd()
+{
+    QMessageBox msgBox;
+    msgBox.setText("Вы действительно хотите очистить весь банк заданий?.");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    msgBox.setButtonText(QMessageBox::Yes, tr("Да"));
+    msgBox.setButtonText(QMessageBox::Cancel, tr("Отмена"));
+    int ret = msgBox.exec();
+    QJsonArray all_ex = get_all_ex();
+    QFile bd(path_to_bd);
+    switch (ret) {
+    case QMessageBox::Yes:
+        while(all_ex.size()>0){
+                all_ex.pop_back();
+        }
+        if(bd.open(QIODevice::WriteOnly)){
+            QJsonDocument jsonDoc;
+            jsonDoc.setArray(all_ex);
+            bd.write(jsonDoc.toJson());
+            update_model(all_ex);
+
+        }
+        break;
+    case QMessageBox::Cancel:
+        qDebug() << "Ну и ладна";
+        break;
+    default:
+        // should never be reached
+        break;
     }
 }
 
@@ -265,6 +319,7 @@ void MainWindow::slot_recieve_select_type_form(int select_item, int parent_item)
 
 void MainWindow::slot_current_index_model(const QModelIndex &item)
 {
+
     qDebug() << item.row();
     QJsonArray all_ex = get_all_ex();
     QJsonValue single_ex;
@@ -276,9 +331,10 @@ void MainWindow::slot_current_index_model(const QModelIndex &item)
             break;
         }
     }
+
 }
 
-void MainWindow::slot_edit_current_ex(QModelIndex item)
+void MainWindow::slot_edit_current_ex()
 {
     qDebug() << "edit";
     QJsonArray all_ex = get_all_ex();
@@ -291,6 +347,52 @@ void MainWindow::slot_edit_current_ex(QModelIndex item)
         }
     }
 
+    Edit_ex edit_ex_form(single_ex["type"].toInt(), single_ex["parent_type"].toInt(), this);
+    edit_ex_form.set_ex(single_ex);
+    if(edit_ex_form.exec()){
+        single_ex = edit_ex_form.get_ex();
+        all_ex[i] = single_ex;
+        QFile bd(path_to_bd);
+        if(bd.open(QIODevice::WriteOnly)){
+            QJsonDocument jsonDoc;
+            jsonDoc.setArray(all_ex);
+            bd.write(jsonDoc.toJson());
+            update_model(all_ex);
+        }
+    }
+}
+
+void MainWindow::slot_clone_current_ex()
+{
+
+    QJsonArray all_ex = get_all_ex();
+    QJsonObject single_ex;
+    int i = 0;
+    for(;i < all_ex.size(); i++){
+        single_ex = all_ex[i].toObject();
+        if(single_ex["id"].toInt() == selected_ex_id){
+            break;
+        }
+    }
+    QVector<bool> free_slot(1000,true);
+    qDebug() << free_slot;
+    QJsonValue temp;
+    for(int i = 0; i < all_ex.size(); i++){
+        for(int j = 0; free_slot.size(); j++){
+            temp = all_ex[i];
+            if(temp["id"].toInt() == j){
+                free_slot[j] = false;
+                break;
+            }
+        }
+    }
+    for(int i = 0; i < free_slot.size(); i++){
+        if(free_slot[i]){
+            single_ex.insert("id", i);
+            break;
+        }
+    }
+    add_ex_to_bd(single_ex);
     Edit_ex edit_ex_form(single_ex["type"].toInt(), single_ex["parent_type"].toInt(), this);
     edit_ex_form.set_ex(single_ex);
     if(edit_ex_form.exec()){

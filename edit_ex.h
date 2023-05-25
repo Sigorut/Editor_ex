@@ -44,6 +44,9 @@ private:
 
     void set_data_number_string_ex(QJsonValue selected_ex);
     void set_data_fields_table_comp_ex(QJsonValue selected_ex);
+    void set_data_fields_seq_ex(QJsonValue selected_ex);
+    void set_data_fields_tablword_ex(QJsonValue selected_ex);
+    void set_data_fields_threetf(QJsonValue selected_ex);
 
 
     void get_data_number_string_ex();

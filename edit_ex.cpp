@@ -93,13 +93,108 @@ void Edit_ex::set_data_fields_table_comp_ex(QJsonValue selected_ex)
                 QJsonValue value = single_answ.value(key);
                 set_field_string(key, "input_A_" + QString::number(i));
                 set_field_string(value.toString(), "input_1_" + QString::number(i));
-                qDebug() << "Key = " << key << ", Value = " << value.toString();
             }
     }
     set_field_int(selected_ex["answer"].toArray().size(), "count_options3");
     set_field_string(selected_ex["text_ex"].toString(), "input_text_ex3");
     set_field_string(selected_ex["solution"].toString(), "solution_text_ex3");
+}
 
+void Edit_ex::set_data_fields_seq_ex(QJsonValue selected_ex)
+{
+    bool flg = false;
+    form->page()->runJavaScript("set_fields(" + QString::number(selected_ex["options"].toArray().size()) + ")",
+                                [&](QVariant result)->void{
+        flg = true;
+    });
+    while(!flg){
+        QApplication::processEvents();
+    }
+    QJsonArray arr_options = selected_ex["options"].toArray();
+    QJsonObject single_option;
+    for(int i = 0; i < arr_options.size(); i++){
+        single_option = arr_options[i].toObject();
+        foreach(const QString& key, single_option.keys()) {
+                QJsonValue value = single_option.value(key);
+                set_field_string(value.toString(), "input_1_" + QString::number(i));
+            }
+        //set_field_string(options[i]., "input_1_" + QString::number(i+1));
+    }
+    set_field_int(selected_ex["options"].toArray().size(), "count_options5");
+    set_field_int(selected_ex["answer"].toString().toInt(), "answer5");
+    set_field_string(selected_ex["text_ex"].toString(), "input_text_ex5");
+    set_field_string(selected_ex["solution"].toString(), "solution_text_ex5");
+}
+
+void Edit_ex::set_data_fields_tablword_ex(QJsonValue selected_ex)
+{
+    int rows = selected_ex["count_rows"].toInt();
+    int cols = selected_ex["count_cols"].toInt();
+    bool flg = false;
+    form->page()->runJavaScript("set_fields(" + QString::number(rows) + "," +
+            QString::number(cols) + ")",
+                                [&](QVariant result)->void{
+        flg = true;
+    });
+    while(!flg){
+        QApplication::processEvents();
+    }
+    QJsonObject arr_table = selected_ex["table"].toObject();
+    QJsonObject single_elem;
+    for(int i = 0; i < rows; i++){
+       for(int j = 0; j < cols; j++){
+           if(arr_table[QString::number(i) + QString::number(j)].toString() != "~ans~"){
+               set_field_string(arr_table[QString::number(i) + QString::number(j)].toString(), "input_" + QString::number(i) + QString::number(j));
+           }
+       }
+    }
+    set_field_int(rows, "count_rows3");
+    set_field_int(cols, "count_cols3");
+    set_field_string(selected_ex["answer"].toString(), "answer3");
+    set_field_string(selected_ex["text_ex"].toString(), "input_text_ex3");
+    set_field_string(selected_ex["solution"].toString(), "solution_text_ex3");
+}
+
+void Edit_ex::set_data_fields_threetf(QJsonValue selected_ex)
+{
+    bool flg = false;
+    form->page()->runJavaScript("set_fields(" + QString::number(selected_ex["options"].toArray().size()) + ")",
+                                [&](QVariant result)->void{
+        flg = true;
+    });
+    while(!flg){
+        QApplication::processEvents();
+    }
+    QJsonArray options = selected_ex["options"].toArray();
+    QJsonArray answers = selected_ex["answer"].toArray();
+    QStringList list_options, list_answers;
+    for(int i = 0; i < options.size(); i++){
+        list_options << options[i].toString();
+    }
+    for(int i = 0; i < answers.size(); i++){
+        list_answers << answers[i].toString();
+    }
+    qDebug() << list_answers << list_options;
+    for(int i = 0; i < list_options.size(); i++){
+        set_field_string(list_options[i], "input_text_" + QString::number(i));
+        for(int j = 0; j < list_answers.size(); j++){
+            if(list_answers[j] == list_options[i]){
+                bool flg_temp = false;
+                form->page()->runJavaScript("document.getElementById(\"checkbox_input_" + QString::number(i) + "\").checked = true;",
+                                            [&](QVariant result)->void{
+                    flg_temp = true;
+                });
+                while(!flg_temp){
+                    QApplication::processEvents();
+                }
+            }
+        }
+    }
+    //input_text_
+    //checkbox_input_
+    set_field_int(selected_ex["options"].toArray().size(), "count_options4");
+    set_field_string(selected_ex["text_ex"].toString(), "input_text_ex4");
+    set_field_string(selected_ex["solution"].toString(), "solution_text_ex4");
 }
 
 
@@ -201,7 +296,7 @@ void Edit_ex::get_data_seq_ex()
     QString text_ex, solution, single_option_str, answer_str;
     parse_field_string(text_ex, "input_text_ex5");
     parse_field_string(answer_str, "answer5");
-    parse_field_string(solution, "slution_text_ex5");
+    parse_field_string(solution, "solution_text_ex5");
     parse_field_int(count_options, "count_options5");
     for(int i = 0; i < count_options; i++){
         parse_field_string(single_option_str, "input_1_" + QString::number(i));
@@ -241,6 +336,8 @@ void Edit_ex::get_data_tablword_ex()
             }
         }
     }
+    ex.insert("count_rows", count_rows);
+    ex.insert("count_cols", count_cols);
     ex.insert("text_ex", text_ex);
     ex.insert("solution", solution);
     ex.insert("type", name_ex);
@@ -295,10 +392,13 @@ void Edit_ex::slot_push_data_to_form()
         set_data_fields_table_comp_ex(ex);
         break;
     case Ex::seq:
+        set_data_fields_seq_ex(ex);
         break;
     case Ex::tablword:
+        set_data_fields_tablword_ex(ex);
         break;
     case Ex::treetf:
+        set_data_fields_threetf(ex);
         break;
     default:
         break;
