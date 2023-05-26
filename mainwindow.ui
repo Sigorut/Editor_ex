@@ -41,7 +41,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="src.qrc">
+       <iconset resource="icons/qrcicons.qrc">
         <normaloff>:/trash.ico</normaloff>:/trash.ico</iconset>
       </property>
      </widget>
@@ -52,7 +52,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="src.qrc">
+       <iconset resource="icons/qrcicons.qrc">
         <normaloff>:/add.ico</normaloff>:/add.ico</iconset>
       </property>
      </widget>
@@ -83,7 +83,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="src.qrc">
+       <iconset resource="icons/qrcicons.qrc">
         <normaloff>:/search.ico</normaloff>:/search.ico</iconset>
       </property>
      </widget>
@@ -142,7 +142,7 @@
   </action>
  </widget>
  <resources>
-  <include location="src.qrc"/>
+  <include location="icons/qrcicons.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Script_table_comp.js</file>
+        <file>Script_table_seq.js</file>
+        <file>Script_table_word.js</file>
+        <file>Script_threetf.js</file>
+    </qresource>
+</RCC>
