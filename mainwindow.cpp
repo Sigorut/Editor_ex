@@ -12,7 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
     filter_search = new Filter();
     select_type_form = new Select_type_ex();
     model = new QStandardItemModel();
-    testmodel  = new QStandardItemModel();
     set_enabled_butt(false);
     ui->table_view->horizontalHeader()->setStretchLastSection(true);
     ui->table_view->setSortingEnabled(true);
@@ -63,7 +62,7 @@ void MainWindow::open_bd()
         text_content = bd.readAll();
         json_content = QJsonDocument::fromJson(text_content.toUtf8());
         QJsonArray json_all_ex = json_content.array();
-        qDebug() << text_content;
+//        qDebug() << text_content;
         update_model(json_all_ex);
         ui->table_view->setModel(model);
         ui->table_view->setColumnHidden(3, true);
@@ -100,11 +99,9 @@ void MainWindow::update_model(QJsonArray ex_all)
 {
     int i = 0;
     int sort_column = ui->table_view->horizontalHeader()->sortIndicatorSection();
-
     int sort_order = ui->table_view->horizontalHeader()->sortIndicatorOrder();
     QStandardItem *item;
     QStringList labels;
-    QStringList temp;
     qDebug() << "update" << ex_all.size();
     model->clear();
     labels << "Тип задания" << "Вид Задания" << "Текст задания" << "id";
@@ -326,7 +323,7 @@ void MainWindow::slot_current_index_model(const QModelIndex &item)
     for(int i = 0; i < all_ex.size(); i++){
         single_ex = all_ex[i];
         if(single_ex["id"].toInt() == model->item(item.row(),3)->text().toInt()){
-            qDebug() << single_ex;
+//            qDebug() << single_ex;
             selected_ex_id = single_ex["id"].toInt();
             break;
         }

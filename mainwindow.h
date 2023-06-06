@@ -29,7 +29,6 @@ private:
     QString path_to_bd;
     int selected_ex_id;
     QStandardItemModel* model;
-    QStandardItemModel* testmodel;
     Filter *filter_search;
     Select_type_ex *select_type_form;
     Ui::MainWindow *ui;

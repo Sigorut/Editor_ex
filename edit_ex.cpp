@@ -18,8 +18,9 @@ Edit_ex::Edit_ex(int name_ex, int parent_item, QWidget *parent) :
     buttons->addButton(cancel_butt, QDialogButtonBox::RejectRole);
     set_view();
     ui->verticalLayout->addWidget(form);
-    ui->verticalLayout->addWidget(buttons);
+    ui->verticalLayout_t->addWidget(buttons);
     connect(ok_butt, SIGNAL(clicked()), SLOT(slot_get_data_form()));
+    connect(ui->path_butt, SIGNAL(clicked()), SLOT(slot_get_path_image()));
     connect(cancel_butt, SIGNAL(clicked()), SLOT(reject()));
     connect(this, SIGNAL(signal_accept()), SLOT(accept()));
 
@@ -48,7 +49,7 @@ void Edit_ex::set_view()
         form->load(QUrl("qrc:/table_seq_response.html"));
         break;
     case Ex::tablword:
-       form->load(QUrl("qrc:/table_word_response.html"));
+        form->load(QUrl("qrc:/table_word_response.html"));
         break;
     case Ex::treetf:
         form->load(QUrl("qrc:/threetf.html"));
@@ -79,7 +80,7 @@ void Edit_ex::set_data_fields_table_comp_ex(QJsonValue selected_ex)
 {
     bool flg = false;
     form->page()->runJavaScript("set_fields(" + QString::number(selected_ex["answer"].toArray().size()) + ")",
-                                [&](QVariant result)->void{
+            [&](QVariant result)->void{
         flg = true;
     });
     while(!flg){
@@ -90,10 +91,10 @@ void Edit_ex::set_data_fields_table_comp_ex(QJsonValue selected_ex)
     for(int i = 0; i < arr_answ.size(); i++){
         single_answ = arr_answ[i].toObject();
         foreach(const QString& key, single_answ.keys()) {
-                QJsonValue value = single_answ.value(key);
-                set_field_string(key, "input_A_" + QString::number(i));
-                set_field_string(value.toString(), "input_1_" + QString::number(i));
-            }
+            QJsonValue value = single_answ.value(key);
+            set_field_string(key, "input_A_" + QString::number(i));
+            set_field_string(value.toString(), "input_1_" + QString::number(i));
+        }
     }
     set_field_int(selected_ex["answer"].toArray().size(), "count_options3");
     set_field_string(selected_ex["text_ex"].toString(), "input_text_ex3");
@@ -104,7 +105,7 @@ void Edit_ex::set_data_fields_seq_ex(QJsonValue selected_ex)
 {
     bool flg = false;
     form->page()->runJavaScript("set_fields(" + QString::number(selected_ex["options"].toArray().size()) + ")",
-                                [&](QVariant result)->void{
+            [&](QVariant result)->void{
         flg = true;
     });
     while(!flg){
@@ -115,9 +116,9 @@ void Edit_ex::set_data_fields_seq_ex(QJsonValue selected_ex)
     for(int i = 0; i < arr_options.size(); i++){
         single_option = arr_options[i].toObject();
         foreach(const QString& key, single_option.keys()) {
-                QJsonValue value = single_option.value(key);
-                set_field_string(value.toString(), "input_1_" + QString::number(i));
-            }
+            QJsonValue value = single_option.value(key);
+            set_field_string(value.toString(), "input_1_" + QString::number(i));
+        }
         //set_field_string(options[i]., "input_1_" + QString::number(i+1));
     }
     set_field_int(selected_ex["options"].toArray().size(), "count_options5");
@@ -132,7 +133,7 @@ void Edit_ex::set_data_fields_tablword_ex(QJsonValue selected_ex)
     int cols = selected_ex["count_cols"].toInt();
     bool flg = false;
     form->page()->runJavaScript("set_fields(" + QString::number(rows) + "," +
-            QString::number(cols) + ")",
+                                QString::number(cols) + ")",
                                 [&](QVariant result)->void{
         flg = true;
     });
@@ -140,13 +141,12 @@ void Edit_ex::set_data_fields_tablword_ex(QJsonValue selected_ex)
         QApplication::processEvents();
     }
     QJsonObject arr_table = selected_ex["table"].toObject();
-    QJsonObject single_elem;
     for(int i = 0; i < rows; i++){
-       for(int j = 0; j < cols; j++){
-           if(arr_table[QString::number(i) + QString::number(j)].toString() != "~ans~"){
-               set_field_string(arr_table[QString::number(i) + QString::number(j)].toString(), "input_" + QString::number(i) + QString::number(j));
-           }
-       }
+        for(int j = 0; j < cols; j++){
+            if(arr_table[QString::number(i) + QString::number(j)].toString() != "~ans~"){
+                set_field_string(arr_table[QString::number(i) + QString::number(j)].toString(), "input_" + QString::number(i) + QString::number(j));
+            }
+        }
     }
     set_field_int(rows, "count_rows3");
     set_field_int(cols, "count_cols3");
@@ -159,7 +159,7 @@ void Edit_ex::set_data_fields_threetf(QJsonValue selected_ex)
 {
     bool flg = false;
     form->page()->runJavaScript("set_fields(" + QString::number(selected_ex["options"].toArray().size()) + ")",
-                                [&](QVariant result)->void{
+            [&](QVariant result)->void{
         flg = true;
     });
     while(!flg){
@@ -354,7 +354,19 @@ QJsonObject Edit_ex::get_ex()
 
 void Edit_ex::slot_get_data_form()
 {
-//    qDebug() << name_ex << Ex::tablword;
+    if(!path_to_image.isEmpty()){
+        QFile file(path_to_image);
+        QByteArray data;
+        file.open(QIODevice::ReadOnly);
+        data = file.readAll();
+        QByteArray base64 = data.toBase64();
+        QStringList type;
+        type = path_to_image.split(".");
+
+        ex.insert("image_type", type[1]);
+        ex.insert("image", QString(base64));
+    }
+
     switch (name_ex) {
     case Ex::number:
         get_data_number_string_ex();
@@ -381,6 +393,14 @@ void Edit_ex::slot_get_data_form()
 
 void Edit_ex::slot_push_data_to_form()
 {
+
+        QByteArray base64 = ex.value("image").toString().toUtf8();
+        if(base64.size()!= 0){
+            QPixmap testt;
+            testt.loadFromData(QByteArray::fromBase64(base64), ex.value("image_type").toString().toLocal8Bit().data());
+            ui->label_2->setPixmap(testt.scaled(150, 150, Qt::KeepAspectRatio,  Qt::SmoothTransformation));
+        }
+
     switch (name_ex) {
     case Ex::number:
         set_data_number_string_ex(ex);
@@ -402,6 +422,19 @@ void Edit_ex::slot_push_data_to_form()
         break;
     default:
         break;
+    }
+}
+
+void Edit_ex::slot_get_path_image()
+{
+    QString temp = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                "/",
+                                                tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
+    if(!temp.isEmpty()){
+        path_to_image = temp;
+        ui->lineEdit_path->setText(path_to_image);
+
+        ui->label_2->setPixmap(QPixmap(temp).scaled(150, 150, Qt::KeepAspectRatio,  Qt::SmoothTransformation));
     }
 }
 

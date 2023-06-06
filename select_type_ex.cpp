@@ -18,13 +18,13 @@ Select_type_ex::~Select_type_ex()
 void Select_type_ex::send_data(QString item_text, QString parent_text)
 {
     qDebug() << parent_text;
-    if(item_text == "Числовой ответ" || item_text == "Числовой ответ с рисунком"){
+    if(item_text == "Числовой ответ"){
         emit signal_send_data(1,1);
     }else if(item_text == "Строковый ответ" ||
              item_text == "Строковый ответ с рисунком" ||
              (item_text == "Вставить пропущенное слово" && parent_text == "Строковый ответ")){
         emit signal_send_data(2,2);
-    }else if(item_text == "Сопоставление" || item_text == "Сопоставление с рисунком"){
+    }else if(item_text == "Сопоставление"){
         emit signal_send_data(3,3);
     }else if(item_text == "Последовательность"){
         emit signal_send_data(4,1);

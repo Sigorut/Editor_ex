@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QFileDialog>
+#include <QBuffer>
 
 enum Ex{
     number = 1,
@@ -35,6 +37,7 @@ private:
     Ui::Edit_ex *ui;
     int name_ex;
     int parent_item;
+    QString path_to_image;
     QJsonObject ex;
     QDialogButtonBox *buttons;
     QPushButton *cancel_butt;
@@ -63,6 +66,7 @@ private:
 private slots:
     void slot_get_data_form();
     void slot_push_data_to_form();
+    void slot_get_path_image();
 signals:
     void signal_accept();
 };
