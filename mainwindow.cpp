@@ -50,6 +50,7 @@ void MainWindow::set_enabled_butt(bool flag)
 
 void MainWindow::open_bd()
 {
+    //Открытие базы данных
     QFile bd(path_to_bd);
     QString text_content;
     QJsonDocument json_content;
@@ -59,10 +60,12 @@ void MainWindow::open_bd()
     labels << "Тип задания" << "Вид Задания" << "Текст задания" << "id";
     model->setHorizontalHeaderLabels(labels);
     if(bd.open(QIODevice::ReadOnly)){
+        //Считывается весь файл
         text_content = bd.readAll();
         json_content = QJsonDocument::fromJson(text_content.toUtf8());
+        //Конвертирование строки в QJsonDocument
         QJsonArray json_all_ex = json_content.array();
-//        qDebug() << text_content;
+        //Добавление заданий в модель
         update_model(json_all_ex);
         ui->table_view->setModel(model);
         ui->table_view->setColumnHidden(3, true);
@@ -73,46 +76,44 @@ void MainWindow::open_bd()
 
 void MainWindow::add_ex_to_bd(QJsonObject record)
 {
-    QFile bd(path_to_bd);
-    QString text_content;
-    QJsonDocument json_content;
+    //Добавление задания в базу данных
     QJsonArray json_all_ex;
-    if(bd.open(QIODevice::ReadOnly)){
-        text_content = bd.readAll();
-        json_content = QJsonDocument::fromJson(text_content.toUtf8());
-        json_all_ex = json_content.array();
-        json_all_ex << record;
-        qDebug() << json_all_ex;
-        bd.close();
-    }
+    json_all_ex = get_all_ex();
+    json_all_ex << record;
+    QFile bd(path_to_bd);
     if(bd.open(QIODevice::WriteOnly)){
         QJsonDocument jsonDoc;
         jsonDoc.setArray(json_all_ex);
+        //Запись заданий в файл
         bd.write(jsonDoc.toJson());
         update_model(json_all_ex);
 
     }
-    //    open_bd();
 }
 
 void MainWindow::update_model(QJsonArray ex_all)
 {
+    //Запись заданий в таблицу представления
     int i = 0;
     int sort_column = ui->table_view->horizontalHeader()->sortIndicatorSection();
     int sort_order = ui->table_view->horizontalHeader()->sortIndicatorOrder();
     QStandardItem *item;
     QStringList labels;
-    qDebug() << "update" << ex_all.size();
     model->clear();
+    //Задаем заголовки в таблице
     labels << "Тип задания" << "Вид Задания" << "Текст задания" << "id";
     model->setHorizontalHeaderLabels(labels);
     ui->table_view->clearMask();
+    QString type, parent_type;
+    //Проход по заданиям и добавление определенных полей в таблицу представления
     foreach (const QJsonValue & value, ex_all) {
         QJsonObject obj = value.toObject();
         qDebug() << obj.value("type").toInt();
-        item = new QStandardItem(QString("%1").arg(obj.value("type").toInt()));
+        type = get_type(obj.value("type").toInt());
+        item = new QStandardItem(QString("%1").arg(type));
         model->setItem(i,0,item);
-        item = new QStandardItem(QString("%1").arg(obj.value("parent_type").toInt()));
+        parent_type = get_parent_type(obj.value("parent_type").toInt());
+        item = new QStandardItem(QString("%1").arg(parent_type));
         model->setItem(i,1,item);
         QString valuetemp = obj.value("text_ex").toString();
         if(valuetemp.contains("\\n")){
@@ -132,17 +133,75 @@ void MainWindow::update_model(QJsonArray ex_all)
         model->setItem(i,3,item);
         i++;
     }
+    //Скрытие id задания
     ui->table_view->setColumnHidden(3, true);
+    //Сортировка заданий
     ui->table_view->sortByColumn(sort_column, Qt::SortOrder(sort_order));
+}
+
+QString MainWindow::get_type(int type)
+{
+    //Получение типа задания
+    switch (type) {
+    case 1:
+        return "Числовой ответ";
+        break;
+    case 2:
+        return "Строковый ответ";
+        break;
+    case 3:
+        return "Сопоставление";
+        break;
+    case 4:
+        return "Последовательность";
+        break;
+    case 5:
+        return "Пропущенное слово";
+        break;
+    case 6:
+        return "Выбор верных/неверных";
+        break;
+    default:
+        break;
+    }
+    return "";
+}
+
+QString MainWindow::get_parent_type(int parent_type)
+{
+    //Получение родительского типа заданий
+    switch (parent_type) {
+    case 1:
+        return "Числовой";
+        break;
+    case 2:
+        return "Строковый";
+        break;
+    case 3:
+        return "Табличный";
+        break;
+    case 4:
+        return "Множественный";
+        break;
+    default:
+        break;
+    }
+    return "";
 }
 
 void MainWindow::slot_search()
 {
+    //Поиск по базе данных и вывод найденных записей в таблицу
+    QString data;
+    QString search_line = ui->lineEdit_search->text();
+    search_line = search_line.toLower();
     for(int i = 0; i < model->rowCount(); i++){
         ui->table_view->hideRow(i);
         for(int j = 0; j < model->columnCount(); j++){
             qDebug() << model->item(i,j)->text();
-            if(model->item(i,j)->text().contains(ui->lineEdit_search->text())){
+            data = model->item(i,j)->text();
+            data = data.toLower();
+            if(data.contains(search_line)){
                 ui->table_view->showRow(i);
             }
         }
@@ -151,6 +210,7 @@ void MainWindow::slot_search()
 
 QJsonArray MainWindow::get_all_ex()
 {
+    //Получение всех заданий из базы данных
     QFile bd(path_to_bd);
     QString text_content;
     QJsonDocument json_content;
@@ -172,13 +232,13 @@ void MainWindow::slot_filter()
 
 void MainWindow::slot_create_bd()
 {
+    //Создание базы данных
+    //Вызов диалогового окна для выбора пути до файла
     QString path_to_file = QFileDialog::getSaveFileName(this, tr("Сохранить"),
                                                         "/",
                                                         tr("JSON (*.json)"));
-    qDebug() << path_to_file;
-
+    //Если путь выбран, то создается бд
     if(!path_to_file.isEmpty()){
-
         path_to_bd = path_to_file;
         QFile filejson(path_to_bd);
         if(filejson.open(QIODevice::WriteOnly)){
@@ -188,16 +248,21 @@ void MainWindow::slot_create_bd()
             filejson.write(jsonDoc.toJson());
             filejson.close();
         }
+        //Разблокировка кнопок
         set_enabled_butt(true);
+
         open_bd();
     }
 }
 
 void MainWindow::slot_open_bd()
 {
+    //Открытие созданной базы данных
+    //Получение пути до бд
     QString path_to_file = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                         "/",
                                                         tr("*.json"));
+    //Если путь до файла выбран, то открывается бд
     if(!path_to_file.isEmpty()){
         set_enabled_butt(true);
         path_to_bd = path_to_file;
@@ -207,6 +272,7 @@ void MainWindow::slot_open_bd()
 
 void MainWindow::slot_clear_bd()
 {
+    //Очищение базы данных
     QMessageBox msgBox;
     msgBox.setText("Вы действительно хотите очистить весь банк заданий?.");
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
@@ -214,32 +280,28 @@ void MainWindow::slot_clear_bd()
     msgBox.setButtonText(QMessageBox::Yes, tr("Да"));
     msgBox.setButtonText(QMessageBox::Cancel, tr("Отмена"));
     int ret = msgBox.exec();
-    QJsonArray all_ex = get_all_ex();
     QFile bd(path_to_bd);
     switch (ret) {
     case QMessageBox::Yes:
-        while(all_ex.size()>0){
-                all_ex.pop_back();
-        }
         if(bd.open(QIODevice::WriteOnly)){
             QJsonDocument jsonDoc;
-            jsonDoc.setArray(all_ex);
+            QJsonArray empty;
+            jsonDoc.setArray(empty);
             bd.write(jsonDoc.toJson());
-            update_model(all_ex);
-
+            update_model(empty);
         }
         break;
     case QMessageBox::Cancel:
         qDebug() << "Ну и ладна";
         break;
     default:
-        // should never be reached
         break;
     }
 }
 
 void MainWindow::slot_delete_ex()
 {
+    //Удаление задания из бд
     QMessageBox msgBox;
     msgBox.setText("Удаление задания.");
     msgBox.setInformativeText("Вы действительно хотите удалить задание?");
@@ -253,12 +315,12 @@ void MainWindow::slot_delete_ex()
 
     switch (ret) {
     case QMessageBox::Yes:
-
+        //Проход по бд до соответствия id
         for(int i = 0; i < all_ex.size(); i++){
             single_ex = all_ex[i];
             qDebug() << single_ex["id"].toInt() << selected_ex_id;
             if(single_ex["id"].toInt() == selected_ex_id){
-                qDebug() << "delete";
+                //Удаление задания
                 all_ex.removeAt(i);
                 QFile bd(path_to_bd);
                 if(bd.open(QIODevice::WriteOnly)){
@@ -266,7 +328,6 @@ void MainWindow::slot_delete_ex()
                     jsonDoc.setArray(all_ex);
                     bd.write(jsonDoc.toJson());
                     update_model(all_ex);
-
                 }
                 break;
             }
@@ -288,12 +349,14 @@ void MainWindow::slot_recieve_filter_form(QString str)
 
 void MainWindow::slot_recieve_select_type_form(int select_item, int parent_item)
 {
+    //Получение типа задания из другой формы
+    //Создается форма для создания задания
     Edit_ex edit_ex_form(select_item, parent_item, this);
     if(edit_ex_form.exec()){
         QJsonObject ex = edit_ex_form.get_ex();
         QJsonArray json_all_ex = get_all_ex();
+        //Задание уникального id созданному заданию
         QVector<bool> free_slot(1000,true);
-        qDebug() << free_slot;
         QJsonValue single;
         for(int i = 0; i < json_all_ex.size(); i++){
             for(int j = 0; free_slot.size(); j++){
@@ -310,20 +373,19 @@ void MainWindow::slot_recieve_select_type_form(int select_item, int parent_item)
                 break;
             }
         }
+        //Добавление задания в бд
         add_ex_to_bd(ex);
     }
 }
 
 void MainWindow::slot_current_index_model(const QModelIndex &item)
 {
-
-    qDebug() << item.row();
+    //Получение id задания, при нажатии на него в таблице
     QJsonArray all_ex = get_all_ex();
     QJsonValue single_ex;
     for(int i = 0; i < all_ex.size(); i++){
         single_ex = all_ex[i];
         if(single_ex["id"].toInt() == model->item(item.row(),3)->text().toInt()){
-//            qDebug() << single_ex;
             selected_ex_id = single_ex["id"].toInt();
             break;
         }
@@ -333,7 +395,8 @@ void MainWindow::slot_current_index_model(const QModelIndex &item)
 
 void MainWindow::slot_edit_current_ex()
 {
-    qDebug() << "edit";
+    //Редактирование задания
+    //Определение выбранного задания
     QJsonArray all_ex = get_all_ex();
     QJsonValue single_ex;
     int i = 0;
@@ -343,9 +406,10 @@ void MainWindow::slot_edit_current_ex()
             break;
         }
     }
-
+    //Вызов формы для редактирования
     Edit_ex edit_ex_form(single_ex["type"].toInt(), single_ex["parent_type"].toInt(), this);
     edit_ex_form.set_ex(single_ex);
+    //Если пользователь нажал сохранить, то в бд и таблице изменится задание
     if(edit_ex_form.exec()){
         single_ex = edit_ex_form.get_ex();
         all_ex[i] = single_ex;
@@ -361,7 +425,8 @@ void MainWindow::slot_edit_current_ex()
 
 void MainWindow::slot_clone_current_ex()
 {
-
+    //Дублирование задания
+    //Получение выбранного задания для дублирования
     QJsonArray all_ex = get_all_ex();
     QJsonObject single_ex;
     int i = 0;
@@ -371,6 +436,7 @@ void MainWindow::slot_clone_current_ex()
             break;
         }
     }
+    //Задается новый id для дублированного задания
     QVector<bool> free_slot(1000,true);
     qDebug() << free_slot;
     QJsonValue temp;

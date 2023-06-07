@@ -10,23 +10,25 @@ CONFIG += c++17
 
 SOURCES += \
     edit_ex.cpp \
-    editor.cpp \
     filter.cpp \
+    gen_28line.cpp \
     main.cpp \
     mainwindow.cpp \
-    select_type_ex.cpp
+    select_type_ex.cpp \
+    table_gen_code.cpp
 
 HEADERS += \
     edit_ex.h \
-    editor.h \
     filter.h \
+    gen_28line.h \
     mainwindow.h \
-    select_type_ex.h
+    select_type_ex.h \
+    table_gen_code.h
 
 FORMS += \
     edit_ex.ui \
-    editor.ui \
     filter.ui \
+    gen_28line.ui \
     mainwindow.ui \
     select_type_ex.ui
 

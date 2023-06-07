@@ -23,8 +23,6 @@ Edit_ex::Edit_ex(int name_ex, int parent_item, QWidget *parent) :
     connect(ui->path_butt, SIGNAL(clicked()), SLOT(slot_get_path_image()));
     connect(cancel_butt, SIGNAL(clicked()), SLOT(reject()));
     connect(this, SIGNAL(signal_accept()), SLOT(accept()));
-
-
 }
 
 Edit_ex::~Edit_ex()

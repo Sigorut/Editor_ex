@@ -1,4 +1,3 @@
-
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -36,6 +35,9 @@ private:
     void open_bd();
     void add_ex_to_bd(QJsonObject record);
     void update_model(QJsonArray ex_all);
+    QString get_type(int type);
+    QString get_parent_type(int parent_type);
+
 private slots:
     void slot_search();
     QJsonArray get_all_ex();
