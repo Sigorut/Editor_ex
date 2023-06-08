@@ -15,7 +15,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     select_type_ex.cpp \
-    table_gen_code.cpp
+    table_gen_code.cpp \
+    view_28line.cpp
 
 HEADERS += \
     edit_ex.h \
@@ -23,14 +24,16 @@ HEADERS += \
     gen_28line.h \
     mainwindow.h \
     select_type_ex.h \
-    table_gen_code.h
+    table_gen_code.h \
+    view_28line.h
 
 FORMS += \
     edit_ex.ui \
     filter.ui \
     gen_28line.ui \
     mainwindow.ui \
-    select_type_ex.ui
+    select_type_ex.ui \
+    view_28line.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -40,4 +43,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     html/qrchtml.qrc \
     icons/qrcicons.qrc \
+    img/img.qrc \
     js/qrcjs.qrc

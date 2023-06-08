@@ -161,6 +161,9 @@ QString MainWindow::get_type(int type)
     case 6:
         return "Выбор верных/неверных";
         break;
+    case 7:
+        return "28line";
+        break;
     default:
         break;
     }
@@ -182,6 +185,9 @@ QString MainWindow::get_parent_type(int parent_type)
         break;
     case 4:
         return "Множественный";
+        break;
+    case 5:
+        return "28line";
         break;
     default:
         break;
@@ -351,31 +357,41 @@ void MainWindow::slot_recieve_select_type_form(int select_item, int parent_item)
 {
     //Получение типа задания из другой формы
     //Создается форма для создания задания
-    Edit_ex edit_ex_form(select_item, parent_item, this);
-    if(edit_ex_form.exec()){
-        QJsonObject ex = edit_ex_form.get_ex();
-        QJsonArray json_all_ex = get_all_ex();
-        //Задание уникального id созданному заданию
-        QVector<bool> free_slot(1000,true);
-        QJsonValue single;
-        for(int i = 0; i < json_all_ex.size(); i++){
-            for(int j = 0; free_slot.size(); j++){
-                single = json_all_ex[i];
-                if(single["id"].toInt() == j){
-                    free_slot[j] = false;
-                    break;
-                }
-            }
+    QJsonObject ex;
+    if(select_item > 6){
+        Gen_28line ex_gen_form(select_item, parent_item);
+        if(ex_gen_form.exec()){
+            ex = ex_gen_form.get_ex();
+            qDebug() << "aAAAAAFWFWNFAKWFNAWLKFAWLKFNAWLKFNAWKLFNAWLKFNAWLKFNAWLKFNAWLFKN";
         }
-        for(int i = 0; i < free_slot.size(); i++){
-            if(free_slot[i]){
-                ex.insert("id", i);
+    }else{
+        Edit_ex edit_ex_form(select_item, parent_item, this);
+        if(edit_ex_form.exec()){
+            ex = edit_ex_form.get_ex();
+        }
+    }
+    QJsonArray json_all_ex = get_all_ex();
+    //Задание уникального id созданному заданию
+    QVector<bool> free_slot(1000,true);
+    QJsonValue single;
+    for(int i = 0; i < json_all_ex.size(); i++){
+        for(int j = 0; free_slot.size(); j++){
+            single = json_all_ex[i];
+            if(single["id"].toInt() == j){
+                free_slot[j] = false;
                 break;
             }
         }
-        //Добавление задания в бд
-        add_ex_to_bd(ex);
     }
+    for(int i = 0; i < free_slot.size(); i++){
+        if(free_slot[i]){
+            ex.insert("id", i);
+            break;
+        }
+    }
+    //Добавление задания в бд
+    qDebug() << ex;
+    add_ex_to_bd(ex);
 }
 
 void MainWindow::slot_current_index_model(const QModelIndex &item)
@@ -406,19 +422,26 @@ void MainWindow::slot_edit_current_ex()
             break;
         }
     }
-    //Вызов формы для редактирования
-    Edit_ex edit_ex_form(single_ex["type"].toInt(), single_ex["parent_type"].toInt(), this);
-    edit_ex_form.set_ex(single_ex);
-    //Если пользователь нажал сохранить, то в бд и таблице изменится задание
-    if(edit_ex_form.exec()){
-        single_ex = edit_ex_form.get_ex();
-        all_ex[i] = single_ex;
-        QFile bd(path_to_bd);
-        if(bd.open(QIODevice::WriteOnly)){
-            QJsonDocument jsonDoc;
-            jsonDoc.setArray(all_ex);
-            bd.write(jsonDoc.toJson());
-            update_model(all_ex);
+    if(single_ex["type"].toInt() > 6){
+        View_28line ex_form(single_ex.toObject(), this);
+        if(ex_form.exec()){
+
+        }
+    }else{
+        //Вызов формы для редактирования
+        Edit_ex edit_ex_form(single_ex["type"].toInt(), single_ex["parent_type"].toInt(), this);
+        edit_ex_form.set_ex(single_ex);
+        //Если пользователь нажал сохранить, то в бд и таблице изменится задание
+        if(edit_ex_form.exec()){
+            single_ex = edit_ex_form.get_ex();
+            all_ex[i] = single_ex;
+            QFile bd(path_to_bd);
+            if(bd.open(QIODevice::WriteOnly)){
+                QJsonDocument jsonDoc;
+                jsonDoc.setArray(all_ex);
+                bd.write(jsonDoc.toJson());
+                update_model(all_ex);
+            }
         }
     }
 }

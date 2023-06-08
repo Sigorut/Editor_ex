@@ -30,8 +30,10 @@ void Select_type_ex::send_data(QString item_text, QString parent_text)
         emit signal_send_data(4,1);
     }else if(item_text == "Вставить пропущенное слово" && parent_text == "Табличный ответ"){
         emit signal_send_data(5,3);
-    }else{
+    }else if(item_text == "Множественный ответ" && parent_text == "Множественный ответ"){
         emit signal_send_data(6,4);
+    }else if(item_text == "28line"){
+        emit signal_send_data(7,5);
     }
     this->close();
 }

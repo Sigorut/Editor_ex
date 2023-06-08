@@ -11,6 +11,9 @@
 #include "filter.h"
 #include "select_type_ex.h"
 #include "edit_ex.h"
+#include "gen_28line.h"
+#include "view_28line.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE

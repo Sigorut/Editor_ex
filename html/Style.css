@@ -2,11 +2,17 @@ div.pbody{
     margin-bottom: 20px;
     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
     padding: 10px;
+    height: auto;
     background-color: rgba(48, 213, 200, 0.2);
 }
 
 body{
 background-color: rgba(237, 237, 237, 1);
+}
+
+img{
+    width: calc(80vw);
+    height: auto;
 }
 
 table, th, td{
